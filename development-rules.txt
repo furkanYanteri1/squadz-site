@@ -1,0 +1,68 @@
+DEVELOPMENT RULES
+
+
+1. FOLDER STRUCTURE
+-------------------
+/app
+  /api                  → future API routes (server actions)
+  /dashboard            → main feed page
+  layout.tsx            → common layout, navbar, etc.
+  page.tsx              → main dashboard page
+
+/components
+  Navbar.tsx            → top navigation bar
+  TeamAvatar.tsx        → renders circular avatar for team
+  PostCard.tsx          → renders individual post
+  PostComposer.tsx      → textarea + submit for new post
+
+/lib
+  supabase/client.ts    → Supabase client for frontend (public)
+  supabase/server.ts    → Supabase client for server actions
+  db.ts                 → shared DB helpers
+  validators.ts         → input validation
+
+/services
+  posts.service.ts      → all DB operations for posts
+    - getAllPosts()
+    - createPost(team_id, content)
+  teams.service.ts      → all DB operations for teams
+    - getAllTeams()
+
+/types
+  database.types.ts     → table structures
+  domain.types.ts       → app-level types
+
+/config
+  constants.ts          → any constants (e.g., max post length)
+
+/public
+  static assets         → team avatars, icons, images
+
+2. RULES FOR FILE MODIFICATIONS
+-------------------------------
+- Components never call Supabase directly; all DB access goes through /services.
+- If a feature requires DB access and service exists → update existing service.
+- If a new feature requires a new entity → create new service file under /services.
+- No inline SQL in components.
+- One responsibility per file: PostCard only renders posts, PostComposer only handles input and submit.
+
+3. DATABASE RULES
+-----------------
+- Use explicit foreign keys and constraints.
+- posts.team_id references teams.id
+- Posts always display team info; no individual user info.
+- Reloading the page always fetches from DB; do not store fake state client-side.
+
+4. BEHAVIOR RULES
+-----------------
+- Dashboard shows all posts ordered newest first.
+- Each post displays:
+  - Team avatar
+  - Team name
+  - Post content
+- Temporary post creation allowed for demo:
+  - User selects team from dropdown
+  - Server Action inserts post to Supabase
+  - Feed refreshes automatically
+- Public feed: no authentication required
+- No client-side mock data
