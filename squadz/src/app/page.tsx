@@ -78,7 +78,13 @@ export default function Home() {
       console.error('Error fetching posts:', error)
     }
 
-    setPosts(data || [])
+    // Type cast to handle Supabase's array response
+    const postsData = (data as any)?.map((post: any) => ({
+      ...post,
+      teams: Array.isArray(post.teams) ? post.teams[0] : post.teams
+    })) as Post[] || []
+
+    setPosts(postsData)
     setLoading(false)
   }, [user, feedMode, supabase])
 
