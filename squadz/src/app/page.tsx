@@ -53,7 +53,7 @@ export default function Home() {
         content,
         created_at,
         team_id,
-        teams (
+        teams!inner (
           name,
           avatar_url
         )
