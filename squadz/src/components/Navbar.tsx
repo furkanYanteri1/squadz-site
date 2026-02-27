@@ -7,7 +7,7 @@ import InviteDialog from "./InviteDialog";
 import LoginDialog from './LoginDialog'
 
 export default function Navbar() {
-  const { user, logout, refreshUser } = useUser();
+  const { user, logout, refreshUser, refreshing } = useUser();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [acceptInviteOpen, setAcceptInviteOpen] = useState(false);
   const [inviteId, setInviteId] = useState("");
@@ -69,16 +69,18 @@ export default function Navbar() {
           {user && (
             <>
               <button
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => setInviteOpen(true)}
+                disabled={refreshing}
               >
                 Invite
               </button>
               <button
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors"
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={logout}
+                disabled={refreshing}
               >
-                Logout
+                {refreshing ? 'Loading...' : 'Logout'}
               </button>
             </>
           )}

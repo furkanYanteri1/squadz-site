@@ -14,8 +14,8 @@ export default function FloatingPostButton() {
   }
 
   const handlePostSuccess = () => {
-    // Sayfayı yenile ki yeni post görünsün
-    window.location.reload()
+    // Window event dispatch - page.tsx dinliyor
+    window.dispatchEvent(new Event('post-created'))
   }
 
   return (

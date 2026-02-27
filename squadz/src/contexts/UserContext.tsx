@@ -18,6 +18,7 @@ interface UserContextProps {
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
   loading: boolean
+  refreshing: boolean
 }
 
 const UserContext = createContext<UserContextProps>({
@@ -25,13 +26,15 @@ const UserContext = createContext<UserContextProps>({
   setUser: () => {},
   logout: async () => {},
   refreshUser: async () => {},
-  loading: true
+  loading: true,
+  refreshing: false
 })
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false) // Yeni state
 
   const fetchUserData = async (supaUser: SupabaseUser): Promise<User | null> => {
     try {
@@ -81,6 +84,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const refreshUser = async () => {
+    setRefreshing(true)
     try {
       console.log('🔄 Refreshing user...')
       const { data: { user: supaUser }, error } = await supabase.auth.getUser()
@@ -106,6 +110,8 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error('Error refreshing user:', error)
       setUser(null)
+    } finally {
+      setRefreshing(false)
     }
   }
 
@@ -155,28 +161,32 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     try {
       console.log('🚪 Logging out...')
-      setLoading(true)
       
-      const { error } = await supabase.auth.signOut()
+      // Session'ı temizle
+      await supabase.auth.signOut({ scope: 'local' })
       
-      if (error) {
-        console.error('Logout error:', error)
-      }
-      
+      // User state'ini temizle
       setUser(null)
       console.log('✅ Logged out successfully')
       
-      // Küçük delay sonra reload - session temizlensin
-      setTimeout(() => {
-        window.location.href = '/'
-      }, 100)
+      // Storage'ı da temizle (ek güvenlik)
+      if (typeof window !== 'undefined') {
+        localStorage.clear()
+        sessionStorage.clear()
+      }
+      
+      // Sayfayı yenile (hard reload - cache'i de temizler)
+      window.location.replace('/')
       
     } catch (error) {
       console.error('Logout exception:', error)
+      // Hata olsa bile temizle ve redirect et
       setUser(null)
-      window.location.href = '/'
-    } finally {
-      setLoading(false)
+      if (typeof window !== 'undefined') {
+        localStorage.clear()
+        sessionStorage.clear()
+      }
+      window.location.replace('/')
     }
   }
 
@@ -193,7 +203,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <UserContext.Provider value={{ user, setUser, logout, refreshUser, loading }}>
+    <UserContext.Provider value={{ user, setUser, logout, refreshUser, loading, refreshing }}>
       {children}
     </UserContext.Provider>
   )
