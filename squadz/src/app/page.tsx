@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase-server'
 
+// Cache'i tamamen devre dışı bırak
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
+export const fetchCache = 'force-no-store'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -25,7 +27,7 @@ export default async function Home() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto p-6 space-y-6">
+    <main className="max-w-2xl mx-auto p-6 space-y-6 pb-24">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-white">Squadz Feed</h1>
         <p className="text-gray-400 text-sm">
